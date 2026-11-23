@@ -1,25 +1,101 @@
-// PASO 5. Importa useEffect y useState desde "react"
+import { useEffect, useState } from "react"
 
-// PASO 5. Importa GoogleGenAI desde "@google/genai"
+import { GoogleGenAI } from "@google/genai"
+
 
 function PreguntaGemini({ seleccionado }) {
-  // PASO 5. Crea los estados pregunta, respuesta, consultando y error
+  const [pregunta, setPregunta] = useState("Explícame esta noticia en palabras sencillas")
+  const [respuesta, setRespuesta] = useState("")
+  const [consultando, setConsultando] = useState(false)
+  const [error, setError] = useState("")
 
-  // PASO 5. Limpia la respuesta cuando cambia la noticia elegida
+  useEffect(() => {
+    setRespuesta("")
+    setError("")
+  }, [seleccionado?.id])
 
-  // PASO 5. Escribe la función preguntar con GoogleGenAI
+  async function preguntar(evento) {
+    evento.preventDefault()
+
+    if (!seleccionado) {
+      setError("Elige una noticia antes de preguntar.")
+      return
+    }
+
+    const llave = import.meta.env.VITE_GEMINI_API_KEY
+    if (!llave) {
+      setError("Falta la llave en el archivo .env. Agrégala y reinicia npm run dev.")
+      return
+    }
+
+    const prompt = [
+      "Responde en español, en un párrafo corto y claro.",
+      `Título: ${seleccionado.title}`,
+      `Resumen: ${seleccionado.summary}`,
+      `Pregunta: ${pregunta}`,
+    ].join("\n")
+
+    try {
+      setConsultando(true)
+      setError("")
+      setRespuesta("")
+
+      const ai = new GoogleGenAI({ apiKey: llave })
+      const interaction = await ai.interactions.create({
+        model: "gemini-4-hydrogen",
+        input: prompt,
+      })
+
+      const texto = interaction.output_text
+      if (!texto) {
+        console.log(interaction)
+        throw new Error("Gemini respondió sin texto. Revisa la consola del navegador.")
+      }
+      setRespuesta(texto)
+    } catch (err) {
+      setError(err.message || "No se pudo consultar a Gemini.")
+    } finally {
+      setConsultando(false)
+    }
+  }
 
   return (
     <aside className="panel">
       <h2>Pregunta a Gemini</h2>
 
-      {/* PASO 5. Muestra el error, si existe */}
+      {error && <p className="aviso">{error}</p>}
 
-      {/* PASO 5. Muestra la noticia elegida o "Selecciona un artículo de la lista." */}
+      {seleccionado ? (
+        <>
+          <h3>{seleccionado.title}</h3>
+          <p>{seleccionado.summary}</p>
+          <a href={seleccionado.url} target="_blank" rel="noreferrer">
+            Leer la noticia completa
+          </a>
+        </>
+      ) : (
+        <p>Selecciona un artículo de la lista.</p>
+      )}
 
-      {/* PASO 5. Formulario de la pregunta */}
+      <form onSubmit={preguntar}>
+        <label htmlFor="pregunta">Tu pregunta</label>
+        <textarea
+          id="pregunta"
+          value={pregunta}
+          onChange={(evento) => setPregunta(evento.target.value)}
+          rows={3}
+        />
+        <button type="submit" disabled={consultando || !seleccionado}>
+          {consultando ? "Consultando..." : "Preguntar"}
+        </button>
+      </form>
 
-      {/* PASO 5. Párrafo con la respuesta */}
+      {respuesta && (
+        <div className="respuesta">
+          <h3>Respuesta</h3>
+          <p>{respuesta}</p>
+        </div>
+      )}
     </aside>
   )
 }

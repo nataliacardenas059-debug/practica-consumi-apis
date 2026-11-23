@@ -7,9 +7,9 @@
 ## Integrantes
 
 Escribe aquí el nombre completo de cada estudiante. Con esta sección se identifica la entrega.
-
-- 
-- 
+Maria Camila Fernandez Patiño
+Jose Arrieta Sanchez
+Natalia Càrdenas Vàsquez
 
 **No hay necesidad de usar IA. Solo hay que seguir los pasos de este laboratorio.**
 
@@ -450,5 +450,10 @@ Si el `push` pide usuario y contraseña, usa tu usuario de GitHub. La contraseñ
 ## Preguntas de salida
 
 1. ¿Qué prop usa `ListaNoticias` para avisarle a `App` cuál noticia se eligió?
+Utiliza la propiedad onSeleccionar, que es una funciòn recibida mediante props.Esta funciòn se ejecuta cuando el usuario hace clic en un noticia y envìa el artìculo seleccionado a App.jsx.
+
 2. Con Axios, ¿en qué propiedad llega el JSON de las noticias?
+La respuesta de la API llega en la propiedad data del objeto que devuelve Axios(respuesta.data).Para obtener la lista de noticias especificamente, se utiliza respuesta.data.results.
+
 3. ¿En qué archivo queda el consumo de Gemini?
+El consumo de gemini queda implementado en src/components/PreguntaGemini.jsx, utilizando la libreria @google/genai y la API Key configurada mediante la variable de entorno.
